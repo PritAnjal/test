@@ -19,6 +19,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="bfdbd506-7361-4899-95e9-de0986a92a09" variableName="Pratik"/>
 		<flow-ref doc:name="Flow Reference" doc:id="188b9c5c-e489-4e8f-93b2-f8ecf365f2b7" name="childFlow"/>
 		<logger level="INFO" doc:name="Logger" doc:id="0bda54f1-bce7-4a3f-9bfd-2f2f61a633a0" message="end"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b1d29653-212c-45dc-a8b7-3f994e587afa" message="success"/>
 	</flow>
 	<flow name="childFlow" doc:id="4b21321a-3fab-4c8e-918a-1c8472f50a52" >
 		<set-payload value="SettingPayloadManually" doc:name="Set Payload" doc:id="c12b0d32-8cfd-4330-9909-084b222fc7da" />
