@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<vm:config name="VM_Config" doc:name="VM Config" doc:id="c827cf47-a5c8-4824-9532-4521cdbbd422" >
+		<vm:connection />
+		<vm:queues >
+			<vm:queue queueName="one" />
+			<vm:queue queueName="two" />
+		</vm:queues>
+	</vm:config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="6d08c296-71ba-461b-b9e0-4ab5ea8fa1e3" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="4de16db3-f50b-47ee-b4b8-494c48318a68" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration2" doc:name="HTTP Request configuration" doc:id="ec742d35-a93e-452b-8214-c82efd3981ad" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="58af4334-7a42-489f-bcc0-322b17105a62" >
+		<email:smtp-connection host="pop.gmail.com" port="995" user="pratik.a.thorat@apisero.com" password="ILAnjee#286" connectionTimeout="15" readTimeout="15" writeTimeout="15" >
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<file:config name="File_Config1" doc:name="File Config" doc:id="7e2804a6-9840-4a82-8a91-283357ffa359" >
+		<file:connection workingDir="C:\Pratik\payload" />
+	</file:config>
+	<flow name="testingJmsScenarioFlow" doc:id="fa7b0bf3-21aa-4f21-9ddb-dda11d304d61" initialState="stopped">
+		<http:listener doc:name="Listener" doc:id="78878dcf-057a-4583-9176-80a18cfc7506" config-ref="HTTP_Listener_config" allowedMethods="POST" path="/Hello"/>
+		<vm:publish queueName="one" doc:name="Publish" doc:id="3ad6ffba-e220-479f-ae77-98aea6f5b858" config-ref="VM_Config" timeout="20"/>
+		<http:request method="POST" doc:name="Request" doc:id="ee3f4a46-4b2e-4846-8f7f-b4c75b4253a7" config-ref="HTTP_Request_configuration" path="/data"/>
+		<vm:publish-consume queueName="two" doc:name="Publish consume" doc:id="0cc60062-ecb7-4845-9666-9b042b7d9fff" config-ref="VM_Config" timeout="20" transactionalAction="NOT_SUPPORTED"/>
+	</flow>
+	<flow name="testingJmsScenarioFlow6" doc:id="d08b2215-1853-44ba-95b4-8ea23330156b" initialState="stopped">
+		<scheduler doc:name="Scheduler" doc:id="956a47b6-6e06-42eb-a893-5e7c8fc3d482" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="10" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<set-payload value='#[output application/json&#10;---&#10;{&#10;  "Name": "Pratik",&#10;  "Age"	: 29&#10;}]' doc:name="Set Payload" doc:id="f1a72b76-175d-43fe-9647-7dd69f76e478" />
+		<logger level="INFO" doc:name="Logger" doc:id="55d75bc4-eef3-475f-9a82-0dbe0464b547" message="#[typeOf(payload)]"/>
+	</flow>
+	<flow name="testingJmsScenarioFlow1" doc:id="7ce79067-4504-4520-986b-79728cb62659" >
+		<vm:consume doc:name="Consume" doc:id="2f14db2a-0c3f-473f-a7f7-bc63e92d64df" config-ref="VM_Config" queueName="one" timeout="20"/>
+		<set-payload value="#[payload as String ++ 'JMS1']" doc:name="Set Payload" doc:id="785de970-b7b3-4498-806b-faf69a823ea7" />
+	</flow>
+	<flow name="testingJmsScenarioFlow2" doc:id="c4ab8b38-fb0c-4b89-b7b6-998074f284ff" >
+		<http:listener doc:name="Listener" doc:id="e392c6ea-2841-4d72-9cde-6289d4416e94" config-ref="HTTP_Listener_config" path="/data"/>
+		<set-payload value="#[payload as String ++ 'HTTP']" doc:name="Set Payload" doc:id="ae77fc0e-2333-4216-b722-fee2f673c244" />
+	</flow>
+	<flow name="testingJmsScenarioFlow3" doc:id="fbce28e0-cab6-42bb-9baf-52a488615cb4" >
+		<vm:consume queueName="two" doc:name="Consume" doc:id="296b52be-85c4-4429-977c-c9255716de11" config-ref="VM_Config" timeout="20" transactionalAction="NOT_SUPPORTED"/>
+		<set-payload value="#[payload as String ++ 'JMS2']" doc:name="Set Payload" doc:id="dfd8c3b1-e9a7-491a-a41f-429ed3ab1afa" />
+	</flow>
+	<flow name="testingJmsScenarioFlow4" doc:id="f4e63c2e-3d98-4d78-8d31-77bebc72b0de" initialState="stopped">
+		<scheduler doc:name="Scheduler" doc:id="a441946e-c6d9-41a3-bc99-3481bf3c13e7" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="10" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<set-payload value='#[[400,1000,100]]' doc:name="Set Payload" doc:id="9beb39e2-fe05-478f-ac6d-a560cb90312e" />
+		<batch:job jobName="testingJmsScenarioBatch_Job" doc:id="1c24c625-afe7-4d22-bc7a-03c975018498" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="cb1b98af-4c04-4a84-b51a-a01888663261" acceptExpression="payload &lt; 500">
+					<set-payload doc:name="Set Payload" doc:id="4a6fd2df-18e5-4c80-b2e9-416ad0dcd35a" value="#[payload + 100]"/>
+					<logger level="INFO" doc:name="Logger" doc:id="4eb0efae-6067-4254-b281-e15dd81dd75d" message="#[payload]"/>
+				</batch:step>
+				<batch:step name="Batch_Step1" doc:id="88cd9707-1af1-4930-bf1c-5404fde151b4" acceptExpression="payload &gt;200">
+					<set-payload value='#[payload]' doc:name="Set Payload" doc:id="6d8cbc74-eb8e-4ba9-a301-7ea5101d9cea" />
+					<logger level="INFO" doc:name="Logger" doc:id="1fab7aae-adad-4208-a502-e2210af5cb0b" message="#[payload]"/>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="075dc766-b1ae-4c99-a8a4-28e0d8a50d0d" />
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+	<flow name="testingJmsScenarioFlow5" doc:id="19cda550-3c74-46fe-99ca-9803ca0b6394" >
+		<http:listener doc:name="Listener" doc:id="28d4c33e-0b05-459e-aaaa-4aeef32ec31b" config-ref="HTTP_Listener_config" path="/28Answer"/>
+		<ee:transform doc:name="Transform Message" doc:id="b2aa1ff1-8170-4cb1-b3c6-c092cc596e7e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request" doc:id="39d240e4-97ff-4757-9aed-af73ca1eecdf" config-ref="HTTP_Request_configuration1" path="/orderXml" target="theResult"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c8eff7af-ab32-41a4-ab3f-c2f0ac0e572a" message="#[payload]"/>
+	</flow>
+	<flow name="testingJmsScenarioFlow7" doc:id="aebb7a9b-6578-4e5f-9504-4c25eb7578aa" >
+		<http:listener doc:name="Listener" doc:id="12a698b2-35e5-434d-8984-058a010ba131" config-ref="HTTP_Listener_config" path="/orderXml"/>
+		<set-payload value="#[output application/json&#10;---&#10;payload]" doc:name="Set Payload" doc:id="d8a71008-0235-4a0a-a659-211a2e708855" />
+	</flow>
+	<flow name="testingJmsScenarioFlow8" doc:id="52ff446b-f7cb-4b28-a9b4-af8014f68796" initialState="stopped">
+		<scheduler doc:name="Scheduler" doc:id="d2a3c7c3-8fe4-4c4a-8537-389739cf100c" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="10" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<set-payload value="#[['1','2','3','4']]" doc:name="Set Payload" doc:id="a128a7f4-9942-4bd7-8971-fffc51697546" />
+		<set-variable value="10" doc:name="Set Variable" doc:id="69408411-345a-42c6-b157-fa7f8260c4a5" variableName="quantity"/>
+		<foreach doc:name="For Each" doc:id="8ec3828b-f190-488c-8800-d3a680d3e75b" >
+			<set-payload value='#["orders" ++ payload]' doc:name="Set Payload" doc:id="488fd520-875d-4fa6-b87e-e5f14e58a4ad" />
+			<set-variable value="#[vars.quantity + 1]" doc:name="Set Variable" doc:id="832e65c6-477e-4004-ba44-ba394ca8d7fb" variableName="quantity"/>
+		</foreach>
+		<logger level="INFO" doc:name="Logger" doc:id="d49a3a46-e0bf-4300-9eb5-a0aa730e3013" message="#[[payload, vars.quantity]]"/>
+	</flow>
+	<flow name="testingJmsScenarioFlow9" doc:id="a615f39d-08cb-42b4-9c6c-55367cca9bab">
+		<scheduler doc:name="Scheduler" doc:id="de7b7235-f351-4231-bd3f-22dba9dc026e" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="10" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<set-variable value="red" doc:name="Set Variable" doc:id="3babf559-0b7e-43d0-8bc0-6e7669f11e69" variableName="color"/>
+		<set-payload value="red" doc:name="Set Payload" doc:id="27454f17-53c5-475c-9df8-a31c121d8157" />
+		<http:request method="POST" doc:name="Request" doc:id="b37af324-db16-422c-9d2d-be9fe04e398b" config-ref="HTTP_Request_configuration2" path="/decideColor"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c3a92baa-de55-4dcd-913c-3eb010664fb7" message="#[payload]"/>
+	</flow>
+	<flow name="testingJmsScenarioFlow10" doc:id="a0814b88-e77a-42a4-8159-108416046ec8" >
+		<http:listener doc:name="Listener" doc:id="27806664-84d6-4fca-8e24-2bdac9303dd5" config-ref="HTTP_Listener_config" path="/decideColor"/>
+		<set-payload value="#[if (vars.color == null) 'white' else 'blue']" doc:name="Set Payload" doc:id="5a804d9e-a9f5-42ee-a923-fc29b7e94138" />
+		<logger level="INFO" doc:name="Logger" doc:id="6abb063c-4d4f-419e-888c-205eed1ce772" message="#[payload]"/>
+	</flow>
+	<flow name="testingJmsScenarioFlow11" doc:id="58307e35-dbcd-4973-aef8-f7dd78b26a0e" initialState="stopped">
+		<scheduler doc:name="Scheduler" doc:id="716fc3a1-0826-4b5b-a059-2f74f538926d" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="10" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<email:send doc:name="Send" doc:id="7b8286e2-11e8-416a-a04f-8fb9554e0a3e" config-ref="Email_SMTP" fromAddress="pratik.a.thorat@apisero.com" subject="Testing email">
+			<email:to-addresses >
+				<email:to-address value="anjali.v.chavan@apisero.com" />
+			</email:to-addresses>
+			<email:body >
+				<email:content ><![CDATA[Helllo Anjali]]></email:content>
+			</email:body>
+		</email:send>
+		<logger level="INFO" doc:name="Logger" doc:id="3d8dcffa-6416-4829-b729-c845996ad014" message="sent"/>
+	</flow>
+	<flow name="testingJmsScenarioFlow13" doc:id="1e199728-f7a4-4d7f-ba77-fab18198fdc2" initialState="stopped">
+		<http:listener doc:name="Listener" doc:id="15a72158-9242-4f80-a9a2-d3342db81c94" config-ref="HTTP_Listener_config" allowedMethods="POST" path="/append"/>
+		<ee:transform doc:name="Transform Message" doc:id="e20b4c84-5a5d-4aa6-9d3f-4d9d139729c8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{ "Vender" : "Pratik" ++ payload.Age
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write" doc:id="a3b1ba9c-029c-4bd4-bba5-af026c1c16f3" config-ref="File_Config1" path="payload.txt" mode="APPEND"/>
+	</flow>
+	<flow name="testingJmsScenarioFlow12" doc:id="78632bfb-6029-4176-9aaf-0a99ccfb37d6" initialState="stopped">
+		<http:listener doc:name="Listener" doc:id="dd1e6dbf-8701-4a61-aacf-eb14c921902d" config-ref="HTTP_Listener_config" path="/accounts"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="a19db370-1b92-42ca-9a1c-eec57f40d20e" >
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="8d8ed041-3807-4938-a675-6c525b8a80b9" name="setTo100"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="5e1d76a9-5af7-4bfc-940e-835cdf4e9389" name="setTo200"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="6b755749-9050-4813-8900-a0431017a4a9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d6eb7e02-e216-4885-a3d3-f149a684889a" message="#[payload]"/>
+	</flow>
+	<flow name="setTo100" doc:id="7efcccf9-b924-4b10-8a19-1b93f2f783a4" >
+		<set-payload value='#["100"]' doc:name="Set Payload" doc:id="21c060b1-9618-4e36-90ab-5c59fe56635d" />
+	</flow>
+	<flow name="setTo200" doc:id="a498baab-d95c-4af7-91d2-aee681d96d1f" >
+		<set-payload value='#["200"]' doc:name="Set Payload" doc:id="aac4186f-5405-43ea-817a-7df9bb842ce0" />
+	</flow>
+</mule>
